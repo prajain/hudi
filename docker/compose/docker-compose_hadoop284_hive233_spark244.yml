@@ -222,7 +222,7 @@ services:
       command: worker
 
   adhoc-1:
-    image: apachehudi/hudi-hadoop_2.8.4-hive_2.3.3-sparkadhoc_2.4.4:latest
+    image: xs2praveen/hudi-hadoop_2.8.4-hive_2.3.3-sparkadhoc_2.4.4:latest
     hostname: adhoc-1
     container_name: adhoc-1
     env_file:

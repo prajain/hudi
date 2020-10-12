@@ -22,7 +22,7 @@ FROM apachehudi/hudi-hadoop_${HADOOP_VERSION}-hive_${HIVE_VERSION}-sparkbase_${S
 
 ARG PRESTO_VERSION=0.240
 COPY adhoc.sh /opt/spark
-
+ 
 ENV SPARK_WORKER_WEBUI_PORT 8081
 ENV SPARK_WORKER_LOG /spark/logs
 ENV SPARK_MASTER "spark://spark-master:7077"
@@ -30,6 +30,16 @@ ENV PRESTO_VERSION ${PRESTO_VERSION}
 
 RUN set -x \
     ## presto-client
+    && DEBIAN_FRONTEND=noninteractive apt-get -yq update \
+    && apt-get -yq install vim \
     && wget -q -O /usr/local/bin/presto https://repo1.maven.org/maven2/com/facebook/presto/presto-cli/${PRESTO_VERSION}/presto-cli-${PRESTO_VERSION}-executable.jar \
-    && chmod +x /usr/local/bin/presto
+    && wget -q -O /opt/presto-spark-launcher-${PRESTO_VERSION}.jar https://repo1.maven.org/maven2/com/facebook/presto/presto-spark-launcher/${PRESTO_VERSION}/presto-spark-launcher-${PRESTO_VERSION}.jar \
+    && wget -q -O /opt/presto-spark-package-${PRESTO_VERSION}.tar.gz https://repo1.maven.org/maven2/com/facebook/presto/presto-spark-package/${PRESTO_VERSION}/presto-spark-package-${PRESTO_VERSION}.tar.gz \
+    && chmod +x /usr/local/bin/presto \
+    && echo query.hash-partition-count=10 > /opt/config.properties \
+    && echo redistribute-writes=false >> /opt/config.properties \
+    && echo "select 1" > 1.sql \
+    && mkdir -p /opt/presto240/etc/catalog
+
+COPY hive.properties /opt/presto240/etc/catalog   
 CMD ["/bin/bash", "/opt/spark/adhoc.sh"]
